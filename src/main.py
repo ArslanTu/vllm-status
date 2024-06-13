@@ -81,12 +81,15 @@ class LogData(BaseModel):
 
 
 async def clear_server():
+    global vllm_servers
     while True:
+        new_data = {}
         async with data_lock:
             for server_name, data in vllm_servers.items():
-                if time.time() - data["last_update"] > 10:
-                    vllm_servers.pop(server_name)
-        await asyncio.sleep(10)
+                if time.time() - data["last_update"] < 10:
+                    new_data[server_name] = data
+            vllm_servers = dict(new_data)
+        await asyncio.sleep(5)
 
 
 @app.post("/api")
