@@ -60,7 +60,13 @@ def parse(text: str) -> List[Dict[str, Any]]:
     return metrics_with_value
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await asyncio.create_task(clear_server())
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 vllm_servers = {}
 
@@ -80,12 +86,6 @@ async def clear_server():
                 if time.time() - data["last_update"] > 10:
                     vllm_servers.pop(server_name)
         await asyncio.sleep(10)
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await asyncio.create_task(clear_server())
-    yield
 
 
 @app.post("/api")
