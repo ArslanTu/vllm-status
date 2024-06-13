@@ -62,7 +62,7 @@ def parse(text: str) -> List[Dict[str, Any]]:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await asyncio.create_task(clear_server())
+    asyncio.create_task(clear_server())
     yield
 
 
